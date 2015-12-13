@@ -24,13 +24,24 @@ Sam algorytm Closet (nawiązując do artykułu \cite{closetArt}) można przedsta
 \end{algorithmic}
 \end{algorithm}
 
-Natomiast użyta tam procedura \textit{Colset(X, DB, f\_list, FCI)} wykonuje kilka kroków: 
+Natomiast użyta tam procedura \textit{Closet(X, DB, f\_list, FCI)} wykonuje kilka kroków: 
 
 \begin{enumerate}
-  \item (Optymalizacja nr 2 z pracy \cite{closetArt}). Niech $Y$ zawiera te elementy f\_list, które występują w każdej transakcji z DB, wstaw $X \cup Y$ do $FCI$ z takim samym wsparciem.
+  \item (Optymalizacja nr 2 z pracy \cite{closetArt}). Niech $Y$ zawiera te elementy $f\_list$, które występują w każdej transakcji z DB, wstaw $X \cup Y$ do $FCI$ z takim samym wsparciem.
   \item Zbuduj drzewo FP-tree dla danego DB.
-  \item (Optymalizacja nr 3 z pracy \cite{closetArt} -- wydobycie częstych zbiorów zamkniętych jeśli możliwe.
-  \item Formacja warunkowej bazy danych dla każdego elementu f\_list, obliczenie zbiorów częstych. 
-  \item Dla każdego elementu $i$ z f\_list należy rekurencyjnie wywołać funkcję \textit{Closet(iX, DB|i, f\_list|i, FCI)}.
+  \item (Optymalizacja nr 3 z pracy \cite{closetArt} -- wydobycie częstych zbiorów zamkniętych $iX$, jeśli możliwe.
+  \item Formacja warunkowej bazy danych $DB|i$ dla każdego elementu $i$ z	 $f\_list$, obliczenie zbiorów częstych (zwykłych). 
+  \item Dla każdego elementu $i$ z $f\_list$ należy rekurencyjnie wywołać funkcję \textit{Closet(iX, DB|i, f\_list|i, FCI)}.
 \end{enumerate}
+
+Implementacja pełnego algorytmu wymaga podjęcia decyzji odnośnie struktur danych, które będą użyte. 
+Jak już było wspomniane wcześniej -- autorzy zalecają wykorzystanie drzewa FP-tree. 
+Jednak dla bardzo dużych baz danych problemem staje się operowanie taką strukturą w pamięci operacyjnej komputera. 
+Pierwszym rozwiązaniem jest implementacja korzystająca z pamięci dyskowej.
+Drugim częściowe reużycie fragmentów drzewa (ang. partition-based approach).
+W kontekście naszej pracy oba podejścia mają wady. Pierwsze w postaci opóźnień przy dostępie do wywołań systemowych (operacje dyskowe). Stanowią one znaczący narzut, który nie podlega bezpośredniej kontroli.
+Drugie podejście tworzy skomplikowaną strukturę, wymagającą transferu transakcji pomiędzy warunkowymi bazami danych na danym poziomie rekurencji. 
+Jej użycie wiązałoby się z koniecznością ewaluacji wydajności samej struktury i samego algorytmu oddzielnie.
+Z racji, że jedynym celem jest ocena wyłącznie samego algorytmu, wynika że dołączanie do niego skomplikowanej struktury utrudni wszelkie obserwacje jego zachowania (przede wszystkim pomiary).
+Dlatego tymczasowym i wstępnym założeniem, niech będzie fakt, niewykorzystywania bardzo dużych zbiorów danych, które wymagałyby angażowania, któregoś z powyższych rozwiązań i pozostanie przy standardowym wykorzystaniu drzewa FP-tree.
 
