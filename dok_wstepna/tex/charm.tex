@@ -1,0 +1,37 @@
+\section{Algorytm Charm}
+
+Tu będzie pięknie napisany opis algorytmu Charm w pseudokodzie.
+Ale z racji tego, że jeszcze go nie ma, to wklejam inny algorytm ;) To tak tylko dla przykładu, żeby było się na czym wzorować.
+
+\begin{algorithm}
+\caption{Procedura grupowania Quality Threshold Clustering}
+\label{AlgQTC}
+\begin{algorithmic}
+	\Function{QTClustering}{G, d} 
+		\If{$\vert G\vert \leq 1$} 	
+		\Return G \EndIf
+		
+		\ForAll{ $i \in G$ }
+			 \State zbiór $A_{i} \gets \{ i \}$ \Comment{$A_{i}$ jest i-tym kandydatem}
+			 \While {$A_{i} \neq G$}
+			 	\State znajdź $j \in ( G - A_{i} )$ dla którego \Call{średnica}{$A_{i} \cup {j}$} jest minimalna
+			 	
+			 	\If{\Call{średnica}{$A_{i} \cup {j}$} < d}
+			 		\State $A_{i} \gets A_{i} \cup \{j\}$
+			 	\Else
+			 		\State \textbf{break while}
+			 	\EndIf
+	
+			 \EndWhile
+		\EndFor
+		
+		\State zbiór $C \gets$ \Call{największy\_zbiór\_z}{ $ A_{1}, A_{2}, A_{3}, \ldots , A_{\vert G \vert} $ }
+		
+		\State \Return \{ $C$, \Call{QTClustering}{$G - C, d$} \}
+
+	\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+
+

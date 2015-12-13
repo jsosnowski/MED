@@ -1,0 +1,50 @@
+\documentclass[12pt,oneside,a4paper]{article}
+%\documentclass{llncs}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english,polish]{babel}
+\usepackage{polski}
+\usepackage{float}
+\usepackage{hyperref} %spis treści niech będzie łączami
+\hypersetup{
+	plainpages=false,
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
+\usepackage{graphicx}
+\usepackage{pbox}
+\usepackage{tabto}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+% ustawienia środowiska algorytm
+\floatname{algorithm}{Algorytm}
+\renewcommand{\algorithmicfunction}{\textbf{funkcja}}
+% koniec ustawień
+
+% blokada dzielenia wyrazów (dla kopiowania do Worda)
+% \hyphenpenalty 10000
+% \exhyphenpenalty 10000
+% koniec ustawień blokady
+
+\begin{document}
+\author{Jacek Sosnowski}
+\author{Michał Cybulski}
+\title{Implementacja i porównanie algorytmów CHARM i CLOSET}
+\pagenumbering{alph}
+\maketitle
+%\input{tex/strona_tytulowa.tex}
+\clearpage
+\tableofcontents
+\clearpage
+\pagenumbering{arabic}
+\input{tex/wstep.tex}
+
+\input{tex/charm.tex}
+\input{tex/closet.tex}
+
+\clearpage
+\input{tex/bibliografia.tex}
+\end{document}
