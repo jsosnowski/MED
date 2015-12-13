@@ -1,4 +1,36 @@
 \section{Algorytm Closet}
 
-Oto opis algorytmu Closet:
+Algorytm Closet oparty jest na idei ,,dziel i zwyciężaj''. 
+Z tego powodu zbiór danych transakcyjnych (oznaczany w oryginalnym artykule jako TDB -- transakcyjna baza danych) dzielony jest rekurencyjnie na mniejsze podzbiory. Wykonywane jest to z uwzględnieniem znalezionych na danym poziomie zbiorów częstych.
+
+Zamiast operacji bezpośrednio na strukturze transakcyjnej autorzy zalecają bezpośrednią pracę na drzewie FP-tree. 
+Jest to drzewo prefiksowe reprezentujące skompresowany ale kompletny zestaw zbiorów częstych w dostępnej bazie danych.
+
+Sam algorytm Closet (nawiązując do artykułu \cite{closetArt}) można przedstawić ogólnie w pseudokodzie -- Algorytm \ref{closetAlgorithm}.
+
+\begin{algorithm}
+\caption{Algorytm Closet}
+\label{closetAlgorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Wejście:}}
+\renewcommand{\algorithmicensure}{\textbf{Wyjście:}}
+\begin{algorithmic}
+	\Require Transakcyjna baza danych TDB i próg minimalnego wsparcia min\_sup.
+	\Ensure  Kompletny zbiór częstych zbiorów domkniętych.
+	\Function{AlgorytmCloset}{} 
+		\State $FCI \gets \emptyset$ \Comment{$FCI$ to zbiór zbiorów zamkniętych}
+		\State $f\_list \gets \Call{ZnajdzZbioryCzęste}{TBD}$ \Comment{f\_list - lista zb. częstych}
+		\State \Return \Call{Closet}{$\emptyset, TBD, 	f\_list, FCI$}
+	\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Natomiast użyta tam procedura \textit{Colset(X, DB, f\_list, FCI)} wykonuje kilka kroków: 
+
+\begin{enumerate}
+  \item (Optymalizacja nr 2 z pracy \cite{closetArt}). Niech $Y$ zawiera te elementy f\_list, które występują w każdej transakcji z DB, wstaw $X \cup Y$ do $FCI$ z takim samym wsparciem.
+  \item Zbuduj drzewo FP-tree dla danego DB.
+  \item (Optymalizacja nr 3 z pracy \cite{closetArt} -- wydobycie częstych zbiorów zamkniętych jeśli możliwe.
+  \item Formacja warunkowej bazy danych dla każdego elementu f\_list, obliczenie zbiorów częstych. 
+  \item Dla każdego elementu $i$ z f\_list należy rekurencyjnie wywołać funkcję \textit{Closet(iX, DB|i, f\_list|i, FCI)}.
+\end{enumerate}
 
