@@ -28,6 +28,7 @@ Algorytm Charm opisany w artykule \cite{charmArt} służy do wyszukiwania wszyst
 			\If {$newN \neq \emptyset $}
 				\State $\Call{charmExtend}{newN, FCI}$
 			\EndIf
+			\State $FCI \gets FCI \cup X$
 		\EndFor
 	\EndFunction
 	\Function{charmProperty}{$nodes, newN$}
