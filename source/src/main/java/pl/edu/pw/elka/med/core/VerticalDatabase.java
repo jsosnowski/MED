@@ -1,5 +1,7 @@
 package pl.edu.pw.elka.med.core;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 /**
@@ -13,8 +15,21 @@ public class VerticalDatabase extends AbstractCSVDatabase {
 
     private final Map<Item, Set<Transaction>> itemsToTransactionsMap;
 
-    public VerticalDatabase() {
+    public VerticalDatabase(InputStream dataInputStream) throws IOException {
         this.itemsToTransactionsMap = new HashMap<>();
+        initDataMap(dataInputStream);
+    }
+
+    private void initDataMap(InputStream dataInputStream) throws IOException {
+        loadData(dataInputStream).forEach(((transaction, items) ->
+            items.forEach(item -> {
+                Set<Transaction> transactions = itemsToTransactionsMap.get(item);
+                if (transactions == null) {
+                    transactions = new HashSet<>();
+                    itemsToTransactionsMap.put(item, transactions);
+                }
+                transactions.add(transaction);
+            })));
     }
 
     @Override
@@ -33,9 +48,9 @@ public class VerticalDatabase extends AbstractCSVDatabase {
     @Override
     public Set<Item> getItems(Transaction transaction) {
         Set<Item> items = new HashSet<>();
-        itemsToTransactionsMap.entrySet().forEach((entry) -> {
-            if (entry.getValue().contains(transaction)) {
-                items.add(entry.getKey());
+        itemsToTransactionsMap.forEach((item, transactions) -> {
+            if (transactions.contains(transaction)) {
+                items.add(item);
             }
         });
 

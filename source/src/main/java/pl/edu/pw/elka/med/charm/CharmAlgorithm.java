@@ -11,7 +11,6 @@ import java.util.Set;
  */
 public class CharmAlgorithm implements Algorithm {
 
-
     @Override
     public Set<ItemSet> run(Database database, long minSupport) {
 //        FIXME zaimplementować
