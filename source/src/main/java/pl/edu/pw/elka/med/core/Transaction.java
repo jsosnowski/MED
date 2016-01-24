@@ -1,23 +1,22 @@
 package pl.edu.pw.elka.med.core;
 
-import java.util.Set;
-
 /**
- * Interfejs pojedynczej transakcji.
+ * Transakcja z bazy danych.
  */
-public interface Transaction {
+public class Transaction {
+
+    private final long id;
+
+    Transaction(long id) {
+        this.id = id;
+    }
 
     /**
      * Zwraca identyfikator transakcji.
      *
      * @return identyfikator transakcji
      */
-    long getId();
-
-    /**
-     * Zwraca zbiór itemów transakcji.
-     *
-     * @return zbiór itemów transakcji
-     */
-    Set<Item> getItems();
+    public long getId() {
+        return id;
+    }
 }
