@@ -1,8 +1,12 @@
 package pl.edu.pw.elka.med.core;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Pionowa implementacja bazy danych.
@@ -21,23 +25,26 @@ public class VerticalDatabase extends AbstractCSVDatabase {
     }
 
     private void initDataMap(InputStream dataInputStream) throws IOException {
-        loadData(dataInputStream).forEach(((transaction, items) ->
-            items.forEach(item -> {
-                Set<Transaction> transactions = itemsToTransactionsMap.get(item);
-                if (transactions == null) {
-                    transactions = new HashSet<>();
-                    itemsToTransactionsMap.put(item, transactions);
-                }
-                transactions.add(transaction);
-            })));
+        loadData(dataInputStream)
+                .forEach(((transaction, items) ->
+                        items.forEach(item -> {
+                            Set<Transaction> transactions = itemsToTransactionsMap.get(item);
+                            if (transactions == null) {
+                                transactions = new HashSet<>();
+                                itemsToTransactionsMap.put(item, transactions);
+                            }
+                            transactions.add(transaction);
+                        })));
     }
 
     @Override
     public Set<Transaction> getAllTransactions() {
-        Set<Transaction> allTransactionsSet = new HashSet<>();
-        itemsToTransactionsMap.values().forEach(allTransactionsSet::addAll);
-
-        return Collections.unmodifiableSet(allTransactionsSet);
+        return Collections.unmodifiableSet(
+                itemsToTransactionsMap
+                        .values()
+                        .parallelStream()
+                        .reduce(ImmutableSet.of(),
+                                Sets::union));
     }
 
     @Override
@@ -47,14 +54,13 @@ public class VerticalDatabase extends AbstractCSVDatabase {
 
     @Override
     public Set<Item> getItems(Transaction transaction) {
-        Set<Item> items = new HashSet<>();
-        itemsToTransactionsMap.forEach((item, transactions) -> {
-            if (transactions.contains(transaction)) {
-                items.add(item);
-            }
-        });
-
-        return items;
+        return Collections.unmodifiableSet(
+                itemsToTransactionsMap
+                        .entrySet()
+                        .parallelStream()
+                        .filter(entry -> entry.getValue().contains(transaction))
+                        .map(Map.Entry::getKey)
+                        .collect(Collectors.toSet()));
     }
 
     @Override

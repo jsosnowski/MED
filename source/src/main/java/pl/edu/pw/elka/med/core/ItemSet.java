@@ -12,7 +12,7 @@ public interface ItemSet {
      *
      * @return wsparcie zbioru itemów
      */
-    double getSupport();
+    long getSupport();
 
     /**
      * Zwraca itemy ze zbioru.
