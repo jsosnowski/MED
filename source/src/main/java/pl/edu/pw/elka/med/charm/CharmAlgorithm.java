@@ -102,10 +102,8 @@ public class CharmAlgorithm implements Algorithm {
             }
 
             Collections.sort(newNodes, getListComparator());
-            List<CharmItemSet> listForNewNodes = newList();
-            listForNewNodes.addAll(0, newNodes);
             if (!newNodes.isEmpty()) {
-                charmExtend(listForNewNodes, frequentItemSets, minSupport);
+                charmExtend(newNodes, frequentItemSets, minSupport);
             }
 
             tryAddToFrequentItemSets(currentItemSet, frequentItemSets);
