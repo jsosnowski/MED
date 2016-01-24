@@ -35,12 +35,27 @@ public class CharmAlgorithmTest {
     @Test
     public void testRun() throws Exception {
         // given
-        long minSup = (long) (database.getAllTransactions().size() * 0.25);
+        long minSup = (long) (database.getAllTransactions().size() * 0.50);
 
         // when
         Set<ItemSet> frequentItemSets = charmAlgorithm.run(database, minSup);
 
         // then
         Assertions.assertThat(frequentItemSets.size() > 0).isTrue();
+
+        System.out.println("minsup=" + minSup + ", found=" + frequentItemSets.size());
+
+        frequentItemSets
+                .stream()
+                .sorted((o1, o2) -> Long.compare(o1.getSupport(), o2.getSupport()) * -1)
+                .limit(5)
+                .forEach(itemSet -> System.out.println(itemSet.toString()));
+        System.out.println("---");
+
+        frequentItemSets
+                .stream()
+                .sorted((o1, o2) -> Long.compare(o1.getSupport(), o2.getSupport()))
+                .limit(5)
+                .forEach(itemSet -> System.out.println(itemSet.toString()));
     }
 }
