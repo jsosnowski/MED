@@ -6,10 +6,25 @@ repositories {
     jcenter()
 }
 
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+jar {
+    baseName = 'med-charm'
+    version = '1.0'
+    manifest {
+        attributes 'Implementation-Title': 'MED CHARM',
+                   'Implementation-Version': version,
+                   'Main-Class': 'pl.edu.pw.elka.med.Main'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
 dependencies {
     // logowanie
     compile 'ch.qos.logback:logback-classic:1.1.3'
-    // rózne utile
+    // różne utile
     compile 'com.google.guava:guava:19.0'
     compile 'org.apache.commons:commons-lang3:3.4'
     // czytanie CSV
