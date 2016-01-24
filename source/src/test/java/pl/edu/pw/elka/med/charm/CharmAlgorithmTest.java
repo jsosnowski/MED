@@ -33,29 +33,62 @@ public class CharmAlgorithmTest {
     }
 
     @Test
-    public void testRun() throws Exception {
+    public void testRunMinSup50() throws Exception {
         // given
-        long minSup = (long) (database.getAllTransactions().size() * 0.50);
+        long minSup = (long) (database.getAllTransactions().size() * 0.5);
 
         // when
         Set<ItemSet> frequentItemSets = charmAlgorithm.run(database, minSup);
 
         // then
-        Assertions.assertThat(frequentItemSets.size() > 0).isTrue();
+        Assertions.assertThat(frequentItemSets.size()).isEqualTo(45);
+    }
 
-        System.out.println("minsup=" + minSup + ", found=" + frequentItemSets.size());
+    @Test
+    public void testRunMinSup30() throws Exception {
+        // given
+        long minSup = (long) (database.getAllTransactions().size() * 0.30);
 
-        frequentItemSets
-                .stream()
-                .sorted((o1, o2) -> Long.compare(o1.getSupport(), o2.getSupport()) * -1)
-                .limit(5)
-                .forEach(itemSet -> System.out.println(itemSet.toString()));
-        System.out.println("---");
+        // when
+        Set<ItemSet> frequentItemSets = charmAlgorithm.run(database, minSup);
 
-        frequentItemSets
-                .stream()
-                .sorted((o1, o2) -> Long.compare(o1.getSupport(), o2.getSupport()))
-                .limit(5)
-                .forEach(itemSet -> System.out.println(itemSet.toString()));
+        // then
+        Assertions.assertThat(frequentItemSets.size()).isEqualTo(427);
+    }
+
+    @Test
+    public void testRunMinSup70() throws Exception {
+        // given
+        long minSup = (long) (database.getAllTransactions().size() * 0.70);
+
+        // when
+        Set<ItemSet> frequentItemSets = charmAlgorithm.run(database, minSup);
+
+        // then
+        Assertions.assertThat(frequentItemSets.size()).isEqualTo(12);
+    }
+
+    @Test
+    public void testRunMinSup90() throws Exception {
+        // given
+        long minSup = (long) (database.getAllTransactions().size() * 0.90);
+
+        // when
+        Set<ItemSet> frequentItemSets = charmAlgorithm.run(database, minSup);
+
+        // then
+        Assertions.assertThat(frequentItemSets.size()).isEqualTo(5);
+    }
+
+    @Test
+    public void testRunMinSup100() throws Exception {
+        // given
+        long minSup = database.getAllTransactions().size();
+
+        // when
+        Set<ItemSet> frequentItemSets = charmAlgorithm.run(database, minSup);
+
+        // then
+        Assertions.assertThat(frequentItemSets.size()).isEqualTo(1);
     }
 }

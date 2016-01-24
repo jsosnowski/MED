@@ -17,14 +17,18 @@ public class CharmAlgorithm implements Algorithm {
 
     @Override
     public Set<ItemSet> run(Database database, long minSupport) {
-        Set<ItemSet> frequentItemSets = new HashSet<>();
+        Map<Integer, List<CharmItemSet>> frequentItemSets = new HashMap<>();
         // preprocessing
         List<CharmItemSet> nodes = preprocessItems(database, minSupport);
 
         // odpalenie algorytmu
         charmExtend(nodes, frequentItemSets, minSupport);
 
-        return frequentItemSets;
+        // przepakowanie do zbioru
+        Set<ItemSet> resultSet = new HashSet<>();
+        frequentItemSets.values().forEach(resultSet::addAll);
+
+        return resultSet;
     }
 
     /**
@@ -33,15 +37,15 @@ public class CharmAlgorithm implements Algorithm {
      * @param nodes uporządkowany zbiór wierzchołków drzewa do przeszukiwania
      * @param frequentItemSets znalezione zbiory częste
      */
-    private void charmExtend(List<CharmItemSet> nodes, Set<ItemSet> frequentItemSets, long minSupport) {
+    private void charmExtend(List<CharmItemSet> nodes,
+                             Map<Integer, List<CharmItemSet>> frequentItemSets,
+                             long minSupport) {
         ListIterator<CharmItemSet> iterator = nodes.listIterator();
 
         while (iterator.hasNext()) {
             CharmItemSet currentItemSet = iterator.next();
             if (currentItemSet.isShouldBeRemoved()) {
-                // usuwanie węzłów, które powinny zostać usunięte
-//                FIXME
-//                iterator.remove();
+                // nie usuwamy węzłów ze względu na problemy z ConcurrentModificationException
                 continue;
             }
 
@@ -51,7 +55,7 @@ public class CharmAlgorithm implements Algorithm {
             while (secIterator.hasNext()) {
                 CharmItemSet nextItemSet = secIterator.next();
                 if (nextItemSet.isShouldBeRemoved()) {
-                    // węzeł powinien być usunięty, ale jeszcze nie zdążył
+                    // usuniętych węzłów nie bierzemy pod uwagę
                     continue;
                 }
 
@@ -62,6 +66,7 @@ public class CharmAlgorithm implements Algorithm {
                                                                                nextItemSet.getTransactions()));
 
                 if (newCandidate.getSupport() < minSupport) {
+                    // odrzucamy kandydata, ponieważ ma za małe wsparcie
                     continue;
                 }
 
@@ -71,23 +76,20 @@ public class CharmAlgorithm implements Algorithm {
                     // węzeł do usunięcia
                     nextItemSet.setShouldBeRemoved();
                     // podmieniamy X_i
-//                    iterator.set(newCandidate);
-//                    frequentItemSets.add(currentItemSet);
-//                    currentItemSet = newCandidate;
                     currentItemSet.updateItemSet(newCandidate.getItems());
                     replaceAllSubsets(newCandidate, newNodes);
                 } else if (Sets.difference(currentItemSet.getTransactions(),
                                            nextItemSet.getTransactions()).isEmpty()
-                        && !Sets.difference(currentItemSet.getTransactions(),
-                                           nextItemSet.getTransactions()).isEmpty()) {
+                        && !Sets.difference(nextItemSet.getTransactions(),
+                                            currentItemSet.getTransactions()).isEmpty()) {
                     // X_i zawiera się w X_j
                     // podmieniamy X_i
                     currentItemSet.updateItemSet(newCandidate.getItems());
                     replaceAllSubsets(newCandidate, newNodes);
                 } else if (!Sets.difference(currentItemSet.getTransactions(),
                                            nextItemSet.getTransactions()).isEmpty()
-                        && Sets.difference(currentItemSet.getTransactions(),
-                                            nextItemSet.getTransactions()).isEmpty()) {
+                        && Sets.difference(nextItemSet.getTransactions(),
+                                           currentItemSet.getTransactions()).isEmpty()) {
                     // X_j zawiera się w X_i
                     // węzeł do usunięcia
                     nextItemSet.setShouldBeRemoved();
@@ -99,14 +101,14 @@ public class CharmAlgorithm implements Algorithm {
                 }
             }
 
-//            FIXME
-//            iterator.remove();
-            frequentItemSets.add(currentItemSet);
-            currentItemSet.setShouldBeRemoved();
-
+            Collections.sort(newNodes, getListComparator());
             List<CharmItemSet> listForNewNodes = newList();
             listForNewNodes.addAll(0, newNodes);
-            charmExtend(listForNewNodes, frequentItemSets, minSupport);
+            if (!newNodes.isEmpty()) {
+                charmExtend(listForNewNodes, frequentItemSets, minSupport);
+            }
+
+            tryAddToFrequentItemSets(currentItemSet, frequentItemSets);
         }
     }
 
@@ -119,6 +121,68 @@ public class CharmAlgorithm implements Algorithm {
     private void replaceAllSubsets(CharmItemSet updatedItemset, Collection<CharmItemSet> newNodes) {
         for (CharmItemSet charmItemSet : newNodes) {
             charmItemSet.updateItemSet(updatedItemset.getItems());
+        }
+    }
+
+    private int calculateCharmItemSetPseudoHashCode(CharmItemSet newCharmItemSet) {
+        return newCharmItemSet
+                .getTransactions()
+                .parallelStream()
+                .mapToInt(transaction -> (int) transaction.getId())
+                .sum();
+    }
+
+    /**
+     * Podczas dodawania nowego zbioru częstego do zbiorów wynikowych musimy się upewnić, że nie istnieje
+     * tam już zbiór zamknięty o takim samym wsparciu, którego nowy zbiór byłby podzbiorem.
+     *
+     * W tym celu korzystamy z czegoś w rodzaju ręcznie zarządzanej hash-mapy.
+     *
+     * @param newFrequentItemSet nowo dodawany zbiór częsty
+     * @param frequentItemSets wynikowa kolekcja zbiorów częstych
+     */
+    private void tryAddToFrequentItemSets(CharmItemSet newFrequentItemSet,
+                                          Map<Integer, List<CharmItemSet>> frequentItemSets) {
+        int hashCode = calculateCharmItemSetPseudoHashCode(newFrequentItemSet);
+        List<CharmItemSet> list = frequentItemSets.get(hashCode);
+        if (list == null) {
+            list = newList();
+            frequentItemSets.put(hashCode, list);
+        }
+
+        boolean isCanAdd = true;
+        ListIterator<CharmItemSet> iterator = list.listIterator();
+        while (iterator.hasNext()) {
+            CharmItemSet charmItemSet = iterator.next();
+
+            if (charmItemSet.getSupport() == newFrequentItemSet.getSupport()) {
+                if (Sets.symmetricDifference(charmItemSet.getTransactions(),
+                                             newFrequentItemSet.getTransactions()).isEmpty()) {
+                    // zbiory są identyczne, nie powinno się zdarzyć
+                    isCanAdd = false;
+                    break;
+                } else if (Sets.difference(charmItemSet.getTransactions(),
+                                    newFrequentItemSet.getTransactions()).isEmpty()
+                        && !Sets.difference(newFrequentItemSet.getTransactions(),
+                                            charmItemSet.getTransactions()).isEmpty()) {
+                    // nowy zbiór zawiera się w starym, nie dodajemy
+                    isCanAdd = false;
+                    break;
+                } else if (!Sets.difference(charmItemSet.getTransactions(),
+                                           newFrequentItemSet.getTransactions()).isEmpty()
+                        && Sets.difference(newFrequentItemSet.getTransactions(),
+                                            charmItemSet.getTransactions()).isEmpty()) {
+                    // stary zbiór zawiera się w nowym - tak nie powinno być
+                    if (newFrequentItemSet.getItems().size() > charmItemSet.getItems().size()) {
+                        iterator.set(newFrequentItemSet);
+                    }
+                    isCanAdd = false;
+                }
+            }
+        }
+
+        if (isCanAdd) {
+            list.add(newFrequentItemSet);
         }
     }
 
