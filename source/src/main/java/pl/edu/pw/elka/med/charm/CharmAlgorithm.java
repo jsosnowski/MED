@@ -54,51 +54,7 @@ public class CharmAlgorithm implements Algorithm {
             secIterator.next();
             while (secIterator.hasNext()) {
                 CharmItemSet nextItemSet = secIterator.next();
-                if (nextItemSet.isShouldBeRemoved()) {
-                    // usuniętych węzłów nie bierzemy pod uwagę
-                    continue;
-                }
-
-                // nowy kandydat
-                CharmItemSet newCandidate = new CharmItemSet(Sets.union(currentItemSet.getItems(),
-                                                                        nextItemSet.getItems()),
-                                                             Sets.intersection(currentItemSet.getTransactions(),
-                                                                               nextItemSet.getTransactions()));
-
-                if (newCandidate.getSupport() < minSupport) {
-                    // odrzucamy kandydata, ponieważ ma za małe wsparcie
-                    continue;
-                }
-
-                if (Sets.symmetricDifference(currentItemSet.getTransactions(),
-                                             nextItemSet.getTransactions()).isEmpty()) {
-                    // X_i i X_j są równe
-                    // węzeł do usunięcia
-                    nextItemSet.setShouldBeRemoved();
-                    // podmieniamy X_i
-                    currentItemSet.updateItemSet(newCandidate.getItems());
-                    replaceAllSubsets(newCandidate, newNodes);
-                } else if (Sets.difference(currentItemSet.getTransactions(),
-                                           nextItemSet.getTransactions()).isEmpty()
-                        && !Sets.difference(nextItemSet.getTransactions(),
-                                            currentItemSet.getTransactions()).isEmpty()) {
-                    // X_i zawiera się w X_j
-                    // podmieniamy X_i
-                    currentItemSet.updateItemSet(newCandidate.getItems());
-                    replaceAllSubsets(newCandidate, newNodes);
-                } else if (!Sets.difference(currentItemSet.getTransactions(),
-                                           nextItemSet.getTransactions()).isEmpty()
-                        && Sets.difference(nextItemSet.getTransactions(),
-                                           currentItemSet.getTransactions()).isEmpty()) {
-                    // X_j zawiera się w X_i
-                    // węzeł do usunięcia
-                    nextItemSet.setShouldBeRemoved();
-                    // dodajemy nowy węzeł
-                    newNodes.add(newCandidate);
-                } else {
-                    // X_i oraz X_j nie zawierają się w sobie
-                    newNodes.add(newCandidate);
-                }
+                findExtension(minSupport, currentItemSet, newNodes, nextItemSet);
             }
 
             Collections.sort(newNodes, getListComparator());
@@ -107,6 +63,55 @@ public class CharmAlgorithm implements Algorithm {
             }
 
             tryAddToFrequentItemSets(currentItemSet, frequentItemSets);
+        }
+    }
+
+    private void findExtension(long minSupport, CharmItemSet currentItemSet, List<CharmItemSet> newNodes,
+                               CharmItemSet nextItemSet) {
+        if (nextItemSet.isShouldBeRemoved()) {
+            // usuniętych węzłów nie bierzemy pod uwagę
+            return;
+        }
+
+        // nowy kandydat
+        CharmItemSet newCandidate = new CharmItemSet(Sets.union(currentItemSet.getItems(),
+                                                                nextItemSet.getItems()),
+                                                     Sets.intersection(currentItemSet.getTransactions(),
+                                                                       nextItemSet.getTransactions()));
+
+        if (newCandidate.getSupport() < minSupport) {
+            // odrzucamy kandydata, ponieważ ma za małe wsparcie
+            return;
+        }
+
+        if (Sets.symmetricDifference(currentItemSet.getTransactions(),
+                                     nextItemSet.getTransactions()).isEmpty()) {
+            // X_i i X_j są równe
+            // węzeł do usunięcia
+            nextItemSet.setShouldBeRemoved();
+            // podmieniamy X_i
+            currentItemSet.updateItemSet(newCandidate.getItems());
+            replaceAllSubsets(newCandidate, newNodes);
+        } else if (Sets.difference(currentItemSet.getTransactions(),
+                                   nextItemSet.getTransactions()).isEmpty()
+                && !Sets.difference(nextItemSet.getTransactions(),
+                                    currentItemSet.getTransactions()).isEmpty()) {
+            // X_i zawiera się w X_j
+            // podmieniamy X_i
+            currentItemSet.updateItemSet(newCandidate.getItems());
+            replaceAllSubsets(newCandidate, newNodes);
+        } else if (!Sets.difference(currentItemSet.getTransactions(),
+                                   nextItemSet.getTransactions()).isEmpty()
+                && Sets.difference(nextItemSet.getTransactions(),
+                                   currentItemSet.getTransactions()).isEmpty()) {
+            // X_j zawiera się w X_i
+            // węzeł do usunięcia
+            nextItemSet.setShouldBeRemoved();
+            // dodajemy nowy węzeł
+            newNodes.add(newCandidate);
+        } else {
+            // X_i oraz X_j nie zawierają się w sobie
+            newNodes.add(newCandidate);
         }
     }
 

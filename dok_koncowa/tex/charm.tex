@@ -1,0 +1,54 @@
+\section{Algorytm Charm}
+
+Algorytm Charm opisany w artykule \cite{charmArt} służy do wyszukiwania wszystkich domkniętych zbiorów częstych w zbiorze danych transakcyjnych. Sposób jego działania pozwala na bardzo tanie pozbywanie się zbiorów redundantnych (i takich, które będą generowały redundantne zbiory), co w praktyce w bardzo dużym stopniu ogranicza złożoność obliczeniową potrzebną do wygenerowania zbiorów częstych. Algorytm został przedstawiony w pseudo-kodzie \ref{charmAlgorithm}.
+
+\begin{algorithm}
+\caption{Algorytm Charm}
+\label{charmAlgorithm}
+\renewcommand{\algorithmicrequire}{\textbf{Wejście:}}
+\renewcommand{\algorithmicensure}{\textbf{Wyjście:}}
+\begin{algorithmic}
+	\Require Transakcyjna baza danych TDB i próg minimalnego wsparcia min\_sup.
+	\Ensure  Kompletny zbiór częstych zbiorów domkniętych.
+	\Function{charm}{$TDB \subseteq \mathcal{I} \times \mathcal{T}$, $min\_sup$}
+		\State $nodes \gets \{I_{j} \times t(I_{j}) : I_{j} \in \mathcal{I} \wedge |t(I_{j})| \ge min\_sup \} $
+		\State $FCI \gets \emptyset$ \Comment{$FCI$ to zbiór częstych zbiorów zamkniętych}
+		\State $\Call{charmExtend}{nodes, FCI}$
+		\State \Return $FCI$
+	\EndFunction
+	\Function{charmExtend}{$nodes$, $FCI$}
+		\ForAll {$X_{i} \times t(X_{i}) \in nodes$}
+			\State $newN \gets \emptyset$
+			\State $X = X_{i}$
+			\ForAll {$ X_{j} \times t(X_{j}) \in nodes : f(j) > f(i) $} \Comment{$f(a)$ - funkcja ustalająca kolejność (np. wg kolejności leksykalnej lub wsparcia)}
+				\State $X = X \cup X_{j}$
+				\State $Y = t(X_{i}) \cap t(X_{j})$
+				\State $\Call{charmProperty}{nodes, newN}$
+			\EndFor
+			\If {$newN \neq \emptyset $}
+				\State $\Call{charmExtend}{newN, FCI}$
+			\EndIf
+			\State $FCI \gets FCI \cup X$
+		\EndFor
+	\EndFunction
+	\Function{charmProperty}{$nodes, newN$}
+		\If{$|Y| > min\_sup$}
+			\If{$t(X_{i}) = t(X_{j})$}
+				\State Remove $X_{j}$ from $nodes$
+				\State Replace all $X_{i}$ with $X$
+			\ElsIf{$t(X_{i}) \subset t(X_{j})$}
+				\State Replace all $X_{i}$ with $X$
+			\ElsIf{$t(X_{i}) \supset t(X_{j})$}
+				\State Remove $X_{j}$ from $nodes$
+				\State Add $X \times Y$ to $newN$
+			\ElsIf{$t(X_{i}) \neq t(X_{j})$}
+				\State Add $X \times Y$ to $newN$
+			\EndIf
+		\EndIf
+	\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+Cechą wyróżniającą algorytm Charm jest to, że algorytm ten działa praktycznie jednocześnie zarówno na przestrzeni elementów jak i na przestrzeni identyfikatorów transakcji, podczas gdy większość algorytmów porusza się wyłącznie po przestrzeni elementów. Ta cecha pozwala na wykorzystanie bardzo efektywnej metody badania czy rozpatrywany zbiór jest zbiorem domkniętym i ignorowanie go w przeciwnym wypadku. Analizowane zbiory nie są więc eliminowane tylko na podstawie małej częstości ich występowania, ale także na podstawie braku ich domknięcia.
+
+Algorytm Charm nie korzysta w swojej implementacji z drzew, jak typowe algorytmy generujące zbiory częste. Autorzy sugerują natomiast, żeby dane trzymać w postaci ,,pionowej'' (ang. ,,vertical data format''), czyli niejako przyporządkowując każdemu elementowi zbiór identyfikatorów transakcji, w których on występuje. Dzięki temu operacje sumy oraz przecięć zbiorów oraz wykrywanie czy zbiór transakcji jednego elementu zawiera się w zbiorze drugiego elementu (lub vice versa) są bardzo tanie (praktycznie darmowe) -- zwłaszcza w porównaniu z sytuacją, gdy dane trzymane są standardowo, czyli zbiory elementów przyporządkowywane są poszczególnym transakcjom, a takie porównanie oznacza konieczność iteracji po wszystkich transakcjach.
