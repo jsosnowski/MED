@@ -21,20 +21,29 @@ Obie aplikacje można wygodnie zbudować za pomocą systemu \emph{Gradle}. Komen
 ./gradlew build
 \end{lstlisting}
 
-W wyniku wywołania komend w katalogach $build/lib/$ pojawią się wykonywalne pliki Java z rozszerzeniem $*.jar$.
+W wyniku wywołania komend w katalogach $build/libs/$ pojawią się wykonywalne pliki Java z rozszerzeniem $*.jar$.
 
 \subsection{Uruchamianie}
 
-
-Oba stworzone w ramach projektu programy można uruchomić z poziomu konsoli.
-
-Dane wejściowe, na których testowane były algorytmy pochodziły z repozytorium UCI \cite{UCI} -- zbiór danych to ,,\emph{Mushroom Database}''. Zbiór ten zawiera dane o 8124 grzybach, z których każdy opisany jest 22 atrybutami.
-
+Obie aplikacje uruchamia się bardzo podobnie. Algorytm CHARM:
+\begin{lstlisting}
+java -jar build/libs/med-charm-1.0.jar <opcje>
+\end{lstlisting}
+gdzie opcje:
 \begin{itemize}
-  \item Obie implementacje będą oddzielnymi aplikacjami konsolowymi.
-  \item Językiem programowania będzie Java 8.
-  \item System budowania opierać się będzie o technologię Gradle.
-  \item Dane wejściowe będą stanowić zbiory danych z repozytorium UCI \cite{UCI}.
-  \item Dane wyjściowe będą wyprowadzane na standardowe wyjście lub do pliku.
-  \item Wszelkie użycia dodatkowych bibliotek nie będą związane z główną funkcjonalnością programów, a jedynie z funkcjami pomocniczymi (np. z logowaniem, czy z testowaniem aplikacji).
+	\item <ścieżka do pliku z danymi CSV> -- Plik wejściowy z danymi CSV musi zawierać nagłówek opisujący nazwy atrybutów w transakcjach; przykładowy plik znajduje się w katalogu $src/test/resources/$
+	\item <minimalne wsparcie relatywne> -- Minimalne wsparcie, np. 0.5
+	\item $[$ścieżka do pliku output$]$ -- Plik wyjściowy jest nieobowiązkowy i służy głównie do testów; w przypadku jego podania aplikacja tworzy plik, w którym znajduje się tylko jedna liczba -- czas wykonania algorytmu w nanosekundach
 \end{itemize}
+
+Algorytm CLOSET:
+\begin{lstlisting}
+java -jar build/libs/med-closet-1.0.jar <opcje>
+\end{lstlisting}
+gdzie opcje:
+\begin{itemize}
+	\item <ścieżka do pliku z danymi CSV> -- Plik wejściowy z danymi CSV musi zawierać nagłówek opisujący nazwy atrybutów w transakcjach; przykładowy plik znajduje się w katalogu $src/test/resources/$
+	\item <minimalne wsparcie relatywne> -- Minimalne wsparcie, np. 0.5
+\end{itemize}
+
+Oba programy zwracają wyniki działania także na standardowe wyjście.

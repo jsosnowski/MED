@@ -10,26 +10,19 @@ repositories {
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 jar {
-    baseName = 'med-charm'
+    baseName = 'med-closet'
     version = '1.0'
     manifest {
-        attributes 'Implementation-Title': 'MED CHARM',
+        attributes 'Implementation-Title': 'MED CLOSET',
                    'Implementation-Version': version,
-                   'Main-Class': 'pl.edu.pw.elka.med.Main'
+                   'Main-Class': 'pl.edu.pw.elka.med.ClosetMain'
     }
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
 dependencies {
-    // logowanie
-    compile 'ch.qos.logback:logback-classic:1.1.3'
-    // różne utile
-    compile 'com.google.guava:guava:19.0'
-    compile 'org.apache.commons:commons-lang3:3.4'
-    // czytanie CSV
-    compile 'net.sf.opencsv:opencsv:2.3'
-
     // testy jednostkowe
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:3.3.0'
 }
+
