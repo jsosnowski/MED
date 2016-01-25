@@ -21,8 +21,8 @@ public class ReadCsv {
 			br = new BufferedReader(new FileReader(fileName));
 			while ((line = br.readLine()) != null) {
 				String[] items = line.split(cvsSplitBy);
-				tdb.add(new Tid(Arrays.asList(items)));
-//				tdb.addTid(items); //zamienia elementy na sztuczne identyfikatory
+//				tdb.add(new Tid(Arrays.asList(items)));
+				tdb.addTid(items); //zamienia elementy na sztuczne identyfikatory
 			}
 
 		} catch (FileNotFoundException e) {

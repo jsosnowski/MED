@@ -20,9 +20,11 @@ public class ClosetMain {
 		TDB tdb = ReadCsv.read(args[0]);
 		Double min_sup = Double.parseDouble(args[1]) * tdb.size();
 
+		long startTime = System.nanoTime();
 		FciList foundFcis = alg.start(tdb, min_sup.intValue());
-		System.out.println("Result FCIs: ");
-		System.out.println(foundFcis);
-		System.out.println("DONE");
+		System.out.println(System.nanoTime() - startTime);
+//		System.out.println("Result FCIs: ");
+//		System.out.println(foundFcis);
+//		System.out.println("DONE");
 	}
 }
