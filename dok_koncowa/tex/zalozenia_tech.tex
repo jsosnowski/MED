@@ -1,4 +1,34 @@
-\section{Założenia techniczne}
+\section{Realizacja projektu}
+
+\subsection{Implementacja}
+
+Implementacje obu algorytmów to oddzielne aplikacje konsolowe napisane w języku Java 8. Każdy z członków zespołu zajął się implementacją jednego z algorytmów, co pozwoliło na zrównoleglenie pracy. Do budowania aplikacji wykorzystano \emph{Gradle}.
+
+Implementując oba algorytmy nie korzystano z żadnych dodatkowych bibliotek wykonujących istotną część zadania -- wykorzystano natomiast szereg bibliotek pomocniczych:
+
+\begin{itemize}
+	\item \emph{Open CSV} -- do obsługi wczytywania danych z plików \emph{CSV}
+	\item \emph{Logback} -- obsługa logowania
+	\item \emph{Google Guava}, \emph{Apache Commons} -- rozmaite narzędzia ,,utility''
+	\item \emph{JUnit}, \emph{AssertJ} -- testy jednostkowe
+\end{itemize}
+
+\subsection{Budowanie aplikacji}
+
+Obie aplikacje można wygodnie zbudować za pomocą systemu \emph{Gradle}. Komendy:
+\begin{lstlisting}
+./gradlew clean
+./gradlew build
+\end{lstlisting}
+
+W wyniku wywołania komend w katalogach $build/lib/$ pojawią się wykonywalne pliki Java z rozszerzeniem $*.jar$.
+
+\subsection{Uruchamianie}
+
+
+Oba stworzone w ramach projektu programy można uruchomić z poziomu konsoli.
+
+Dane wejściowe, na których testowane były algorytmy pochodziły z repozytorium UCI \cite{UCI} -- zbiór danych to ,,\emph{Mushroom Database}''. Zbiór ten zawiera dane o 8124 grzybach, z których każdy opisany jest 22 atrybutami.
 
 \begin{itemize}
   \item Obie implementacje będą oddzielnymi aplikacjami konsolowymi.
